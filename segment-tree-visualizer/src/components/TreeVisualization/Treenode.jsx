@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 /**
  * CUSTOM TREE NODE COMPONENT
- * 
+ *
  * Har node ko beautiful glassmorphism style me render karta hai
  * Features:
  * - Range display [start, end]
@@ -18,134 +18,230 @@ const TreeNode = memo(({ data, selected }) => {
 
   /**
    * NODE COLOR SELECTION
-   * State ke according color decide karta hai
+   * Vivid, visible colors — high opacity so nodes are always visible
+   * regardless of background
    */
-  const getNodeColor = () => {
+  const getNodeStyle = () => {
+    // ── Highlight states (animation) ──────────────────────────────
+    if (highlightState === 'active') {
+      return {
+        background: 'rgba(250, 204, 21, 0.85)',   // amber-400
+        border:     '2px solid #fde047',
+        boxShadow:  '0 0 20px 4px rgba(250,204,21,0.6), 0 4px 16px rgba(0,0,0,0.4)',
+        color:      '#1a1a1a',
+      };
+    }
     if (highlightState === 'complete') {
-      return 'bg-green-500/30 border-green-400 shadow-green-500/50';
+      return {
+        background: 'rgba(34, 197, 94, 0.85)',    // green-500
+        border:     '2px solid #4ade80',
+        boxShadow:  '0 0 20px 4px rgba(34,197,94,0.6), 0 4px 16px rgba(0,0,0,0.4)',
+        color:      '#fff',
+      };
     }
     if (highlightState === 'partial') {
-      return 'bg-orange-500/30 border-orange-400 shadow-orange-500/50';
+      return {
+        background: 'rgba(249, 115, 22, 0.85)',   // orange-500
+        border:     '2px solid #fb923c',
+        boxShadow:  '0 0 20px 4px rgba(249,115,22,0.6), 0 4px 16px rgba(0,0,0,0.4)',
+        color:      '#fff',
+      };
     }
     if (highlightState === 'none') {
-      return 'bg-red-500/20 border-red-300 shadow-red-500/30';
+      return {
+        background: 'rgba(239, 68, 68, 0.75)',    // red-500
+        border:     '2px solid #f87171',
+        boxShadow:  '0 0 12px 2px rgba(239,68,68,0.4)',
+        color:      '#fff',
+      };
     }
     if (highlightState === 'lazy') {
-      return 'bg-purple-500/30 border-purple-400 shadow-purple-500/50';
+      return {
+        background: 'rgba(168, 85, 247, 0.85)',   // purple-500
+        border:     '2px solid #c084fc',
+        boxShadow:  '0 0 20px 4px rgba(168,85,247,0.6), 0 4px 16px rgba(0,0,0,0.4)',
+        color:      '#fff',
+      };
     }
     if (highlightState === 'update') {
-      return 'bg-pink-500/30 border-pink-400 shadow-pink-500/50';
+      return {
+        background: 'rgba(236, 72, 153, 0.85)',   // pink-500
+        border:     '2px solid #f472b6',
+        boxShadow:  '0 0 20px 4px rgba(236,72,153,0.6), 0 4px 16px rgba(0,0,0,0.4)',
+        color:      '#fff',
+      };
     }
-    
-    // Default state
+
+    // ── Default states ────────────────────────────────────────────
     if (lazyValue !== null && lazyValue !== 0) {
-      return 'bg-purple-500/20 border-purple-300 shadow-purple-500/30';
+      return {
+        background: 'rgba(124, 58, 237, 0.80)',   // violet-600
+        border:     '2px solid #a78bfa',
+        boxShadow:  '0 0 14px 2px rgba(124,58,237,0.45), 0 4px 12px rgba(0,0,0,0.35)',
+        color:      '#fff',
+      };
     }
     if (isLeaf) {
-      return 'bg-blue-500/20 border-blue-300 shadow-blue-500/30';
+      return {
+        background: 'rgba(37, 99, 235, 0.80)',    // blue-600
+        border:     '2px solid #60a5fa',
+        boxShadow:  '0 0 14px 2px rgba(37,99,235,0.45), 0 4px 12px rgba(0,0,0,0.35)',
+        color:      '#fff',
+      };
     }
-    return 'bg-indigo-500/15 border-indigo-300/50 shadow-indigo-500/20';
+    // Internal node
+    return {
+      background: 'rgba(79, 70, 229, 0.80)',      // indigo-600
+      border:     '2px solid #818cf8',
+      boxShadow:  '0 0 14px 2px rgba(79,70,229,0.45), 0 4px 12px rgba(0,0,0,0.35)',
+      color:      '#fff',
+    };
   };
+
+  const nodeStyle = getNodeStyle();
 
   /**
    * ANIMATION VARIANTS
-   * Node appear/disappear animations
    */
   const nodeVariants = {
-    hidden: { 
-      scale: 0,
+    hidden: {
+      scale:   0,
       opacity: 0,
-      rotate: -180
+      rotate:  -180,
     },
-    visible: { 
-      scale: 1,
+    visible: {
+      scale:   1,
       opacity: 1,
-      rotate: 0,
+      rotate:  0,
       transition: {
-        type: 'spring',
+        type:      'spring',
         stiffness: 260,
-        damping: 20,
-        delay: level * 0.1 // Har level thoda delay se appear hoga
-      }
+        damping:   20,
+        delay:     level * 0.08,
+      },
     },
     highlighted: {
-      scale: 1.1,
+      scale: 1.12,
       transition: {
-        type: 'spring',
+        type:      'spring',
         stiffness: 300,
-        damping: 15
-      }
-    }
+        damping:   15,
+      },
+    },
   };
 
   return (
     <>
-      {/* Top Handle - Parent se connect hone ke liye */}
+      {/* Top Handle — parent connection */}
       {level > 0 && (
         <Handle
           type="target"
           position={Position.Top}
           style={{
-            background: 'rgba(255, 255, 255, 0.3)',
-            width: 8,
-            height: 8,
-            border: '2px solid rgba(255, 255, 255, 0.5)',
+            background:  'rgba(255,255,255,0.6)',
+            width:       10,
+            height:      10,
+            border:      '2px solid rgba(255,255,255,0.9)',
+            borderRadius: '50%',
           }}
         />
       )}
 
-      {/* Main Node Container */}
+      {/* Main Node */}
       <motion.div
         variants={nodeVariants}
         initial="hidden"
-        animate={highlightState ? "highlighted" : "visible"}
-        className={`
-          px-4 py-3 rounded-xl border-2
-          backdrop-blur-md
-          min-w-[100px] text-center
-          shadow-lg
-          transition-all duration-300
-          ${getNodeColor()}
-          ${selected ? 'ring-2 ring-white/50' : ''}
-        `}
-        whileHover={{ scale: 1.05, y: -2 }}
+        animate={highlightState ? 'highlighted' : 'visible'}
+        whileHover={{ scale: 1.06, y: -3 }}
+        style={{
+          ...nodeStyle,
+          backdropFilter: 'blur(8px)',
+          borderRadius:   '14px',
+          minWidth:       '110px',
+          padding:        '10px 16px',
+          textAlign:      'center',
+          position:       'relative',
+          outline:        selected ? '3px solid rgba(255,255,255,0.8)' : 'none',
+          transition:     'box-shadow 0.2s ease, background 0.2s ease',
+          userSelect:     'none',
+        }}
       >
-        {/* Range Label */}
-        <div className="text-white/60 text-xs font-mono mb-1">
+        {/* Range label */}
+        <div style={{
+          fontSize:     '11px',
+          fontFamily:   'monospace',
+          opacity:      0.75,
+          marginBottom: '4px',
+          letterSpacing: '0.5px',
+          color:        nodeStyle.color,
+        }}>
           [{range[0]}, {range[1]}]
         </div>
 
-        {/* Value Display */}
-        <div className="text-white text-lg font-bold font-mono">
+        {/* Value */}
+        <div style={{
+          fontSize:   '22px',
+          fontWeight: '800',
+          fontFamily: 'monospace',
+          lineHeight:  1,
+          color:      nodeStyle.color,
+        }}>
           {value}
         </div>
 
-        {/* Lazy Value Badge (agar pending update hai) */}
+        {/* Lazy badge */}
         {lazyValue !== null && lazyValue !== 0 && (
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="mt-1 px-2 py-0.5 bg-purple-500/50 rounded-full text-xs text-white"
+            style={{
+              marginTop:    '6px',
+              padding:      '2px 8px',
+              background:   'rgba(139,92,246,0.9)',
+              borderRadius: '999px',
+              fontSize:     '11px',
+              color:        '#fff',
+              fontWeight:   '600',
+            }}
           >
             Lazy: +{lazyValue}
           </motion.div>
         )}
 
-        {/* Leaf Indicator */}
+        {/* Leaf indicator */}
         {isLeaf && (
-          <div className="mt-1 text-xs text-white/40">
+          <div style={{
+            marginTop: '4px',
+            fontSize:  '10px',
+            opacity:   0.65,
+            color:     nodeStyle.color,
+          }}>
             🍃 Leaf
           </div>
         )}
 
-        {/* Level Indicator (for debugging) */}
-        <div className="absolute -top-2 -right-2 w-5 h-5 bg-white/20 
-                      rounded-full text-xs text-white/60 flex items-center justify-center">
+        {/* Level badge */}
+        <div style={{
+          position:     'absolute',
+          top:          '-10px',
+          right:        '-10px',
+          width:        '20px',
+          height:       '20px',
+          background:   'rgba(255,255,255,0.25)',
+          borderRadius: '50%',
+          fontSize:     '10px',
+          color:        '#fff',
+          display:      'flex',
+          alignItems:   'center',
+          justifyContent: 'center',
+          fontWeight:   '700',
+          border:       '1px solid rgba(255,255,255,0.4)',
+        }}>
           {level}
         </div>
       </motion.div>
 
-      {/* Bottom Handles - Children ke liye (agar leaf nahi hai) */}
+      {/* Bottom Handles — children */}
       {!isLeaf && (
         <>
           <Handle
@@ -153,11 +249,12 @@ const TreeNode = memo(({ data, selected }) => {
             position={Position.Bottom}
             id="left"
             style={{
-              left: '30%',
-              background: 'rgba(255, 255, 255, 0.3)',
-              width: 8,
-              height: 8,
-              border: '2px solid rgba(255, 255, 255, 0.5)',
+              left:        '28%',
+              background:  'rgba(255,255,255,0.6)',
+              width:       10,
+              height:      10,
+              border:      '2px solid rgba(255,255,255,0.9)',
+              borderRadius: '50%',
             }}
           />
           <Handle
@@ -165,11 +262,12 @@ const TreeNode = memo(({ data, selected }) => {
             position={Position.Bottom}
             id="right"
             style={{
-              left: '70%',
-              background: 'rgba(255, 255, 255, 0.3)',
-              width: 8,
-              height: 8,
-              border: '2px solid rgba(255, 255, 255, 0.5)',
+              left:        '72%',
+              background:  'rgba(255,255,255,0.6)',
+              width:       10,
+              height:      10,
+              border:      '2px solid rgba(255,255,255,0.9)',
+              borderRadius: '50%',
             }}
           />
         </>
